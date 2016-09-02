@@ -19,7 +19,7 @@
 DATA: l_formname TYPE tdsfname,
       l_fm_name TYPE rs381_fnam.
 
-l_formname = 'ZRFISF_FORMULARIO'.
+l_formname = 'NOMBREFORMULARIO'.
 
 * Recupero la funcion que enlaza al formulario
 CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
