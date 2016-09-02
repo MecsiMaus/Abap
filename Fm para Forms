@@ -1,0 +1,16 @@
+*-------------------------------------------------------
+*----   Función para abrir un SAPSCRIPT     ----------
+*-------------------------------------------------------
+
+  CALL FUNCTION 'OPEN_FORM'
+         EXPORTING
+              form           = 'ZSAPSCRIPT'
+              language       = sy-langu
+              OPTIONS        = itcpo
+              device         = 'PRINTER'
+              dialog         = ' '
+*    IMPORTING
+*         NEW_ARCHIVE_PARAMS   = user_arc_params
+
+         EXCEPTIONS
+              OTHERS         = 1.
