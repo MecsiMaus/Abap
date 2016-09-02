@@ -1,0 +1,57 @@
+*-------------------------------------------------------
+*----   Función para abrir un SAPSCRIPT       ----------
+*-------------------------------------------------------
+
+  CALL FUNCTION 'OPEN_FORM'
+         EXPORTING
+              form           = 'ZSAPSCRIPT'
+              language       = sy-langu
+              OPTIONS        = itcpo
+              device         = 'PRINTER'
+              dialog         = ' '
+         EXCEPTIONS
+              OTHERS         = 1.
+
+*-------------------------------------------------------
+*----   Función para abrir un Smartforms      ----------
+*-------------------------------------------------------
+
+DATA: l_formname TYPE tdsfname,
+      l_fm_name TYPE rs381_fnam.
+
+l_formname = 'ZRFISF_FORMULARIO'.
+
+* Recupero la funcion que enlaza al formulario
+CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      formname           = l_formname
+    IMPORTING
+      fm_name            = l_fm_name
+    EXCEPTIONS
+      no_form            = 1
+      no_function_module = 2
+      OTHERS             = 3.
+
+  IF sy-subrc <> 0.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+          WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
+
+* Llamando al formulario
+CALL FUNCTION ls_fm_name
+    EXPORTING
+      gs_ejer          = gs_ejer
+      gs_ruc           = gs_ruc
+      gs_name          = gs_name
+    TABLES
+      gtd_saldos       = lt_cuentas
+    EXCEPTIONS
+      formatting_error = 1
+      internal_error   = 2
+      send_error       = 3
+      user_canceled    = 4
+      OTHERS           = 5.
+  IF sy-subrc <> 0.
+    MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+            WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+  ENDIF.
