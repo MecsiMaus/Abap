@@ -1,38 +1,15 @@
-form texto_mes tables in_tab structure itcsy
-                     out_tab structure itcsy.
+write lv_budat to lv_fecha format dd/mm/yyyy.
+data: v_mes  TYPE t247-mnr,
+      v_longtext TYPE t247-ltx,
+      v_shortext TYPE t247-ktx.
 
-  data: lv_fecha(10).
-  data: lv_mes type t247-ltx.
-  data: lv_date type datum.
+v_mes = lv_fechaformat+3(2).
 
-* Leer el proveedor
-  read table in_tab with key name = '&RFFBWE-BUDAT&'.
-  lv_fecha = in_tab-value.
-  concatenate lv_fecha+6(4) lv_fecha+3(2) lv_fecha(2) into lv_date.
-
-  call function 'ISP_GET_MONTH_NAME'
-    exporting
-      date         = lv_date
-      language     = sy-langu
-      MONTH_NUMBER = '00'
-    importing
-*     LANGU_BACK         =
-      longtext = lv_mes
-*     SHORTTEXT          =
- EXCEPTIONS
-     CALENDAR_ID        = 1
-     DATE_ERROR         = 2
-     NOT_FOUND          = 3
-     WRONG_INPUT        = 4
-     OTHERS   = 5
-    .
-  if sy-subrc <> 0.
-* Implement suitable error handling here
-  endif.
-
-  read table out_tab index 1.
-  move lv_mes to out_tab-value.
-*  CONDENSE out_tab-value NO-GAPS.
-  modify out_tab index 1.
-
-endform. 
+CALL FUNCTION 'ISP_GET_MONTH_NAME'
+  EXPORTING
+    language     = sy-langu
+    month_number = v_mes "v_mes.
+  IMPORTING
+    langu_back   = sy-langu
+    longtext     = v_longtext
+    shorttext    = v_shortext.
