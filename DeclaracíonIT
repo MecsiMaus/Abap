@@ -1,0 +1,7 @@
+TYPES: BEGIN OF listdoc,
+  EXDKB LIKE AKKD-EXDKB,  " documentos exportación/importación
+  EDOAZ LIKE AKKD-EDOAZ,  " número de originales
+  EDKAZ LIKE AKKD-EDKAZ,  " número de copias
+ END OF listdoc.
+ 
+DATA: it_listdoc TYPE listdoc.
