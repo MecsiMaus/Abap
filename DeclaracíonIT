@@ -5,3 +5,4 @@ TYPES: BEGIN OF listdoc,
  END OF listdoc.
  
 DATA: it_listdoc TYPE listdoc.
+DATA: wa_listdoc TYPE LINE OF listdoc.
