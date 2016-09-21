@@ -1,0 +1,17 @@
+    CALL FUNCTION 'POPUP_DISPLAY_MESSAGE'
+      EXPORTING
+        TITEL         = 'Imposible de Remesar'
+        msgid         = '00'
+        msgty         = 'E'
+        msgno         = '368'
+        MSGV1         = 'Las facturas con vía de pago'
+        MSGV2         = '1 E Transferencia no es posible Remesar'
+*       MSGV3         =
+*       MSGV4         =
+              .
+
+
+En la se91 tienes la clase de mensaje 00 y si ves la secuencia de mensajes 368 es de & &.
+que te permiten poner todo lo que quieras.
+
+      MSGV1 MSGV2
