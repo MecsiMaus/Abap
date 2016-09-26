@@ -1,0 +1,14 @@
+SELECT adrnr
+  FROM twlad
+  INTO CORRESPONDING FIELDS OF TABLE it_adrnraux
+  FOR ALL ENTRIES IN it_lgortaux
+   WHERE lgort = it_lgortaux-lgort.
+IF sy-subrc = 0.
+  LOOP AT it_adrnraux INTO wa_adrnraux.
+    SELECT name1 city1 post_code1 street house_num1
+      FROM adrc
+      INTO CORRESPONDING FIELDS OF TABLE it_adrcaux
+      FOR ALL ENTRIES IN it_adrnraux
+      WHERE addrnumber = it_adrnraux-adrnr.
+  ENDLOOP.
+ENDIF.
