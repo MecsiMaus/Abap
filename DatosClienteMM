@@ -1,0 +1,55 @@
+DATA v_adrnr_sol LIKE kna1-adrnr.
+
+break basico.
+
+** Obtenemos su ID de dirección y el CODIGO CLIENTE
+CLEAR: v_adrnr_sol, v_sol_codigo, v_sol_nif.
+
+SELECT SINGLE kunnr adrnr INTO (v_sol_codigo , v_adrnr_sol)
+FROM  vbpa CLIENT SPECIFIED
+WHERE  mandt  = sy-mandt
+AND    vbeln  = v_vbeln
+AND    parvw  = 'AG'.
+
+SELECT SINGLE STCD1 INTO v_sol_nif
+FROM kna1
+WHERE kunnr = v_sol_codigo.
+
+
+** Obtenemos los datos de dirección
+CLEAR wa_adrc_sol.
+SELECT SINGLE * INTO wa_adrc_sol
+FROM adrc WHERE addrnumber = v_adrnr_sol.
+
+** Pais
+CLEAR v_sol_pais.
+SELECT SINGLE landx
+INTO v_sol_pais
+FROM t005t CLIENT SPECIFIED
+WHERE mandt = sy-mandt
+AND spras = 's'
+AND land1 = wa_adrc_sol-country.
+
+IF v_sol_pais EQ ' '.
+  SELECT SINGLE landx
+      INTO v_sol_pais
+      FROM t005t CLIENT SPECIFIED
+      WHERE mandt = sy-mandt
+      AND spras = 'S'
+      AND land1 = wa_adrc_sol-country.
+ENDIF.
+
+** Provincia
+CLEAR v_sol_prov.
+
+SELECT SINGLE bezei
+INTO v_sol_prov
+FROM t005u CLIENT SPECIFIED
+WHERE mandt = sy-mandt
+AND spras = 'ES'
+AND land1 = wa_adrc_sol-country
+AND bland = wa_adrc_sol-region.
+
+IF wa_adrc_sol-country EQ 'FR'.
+  v_sol_prov = ''.
+ENDIF.
