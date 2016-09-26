@@ -24,3 +24,8 @@ Luego en la pestaña de Datos globales.
 it_remesas TYPE ty_remesas.
 wa_remesas type remesas.
 
+
+SI SON DEL STANDARD:
+
+IT_KONV TYPE TABLE OF KONV
+WA_KONV TYPE KONV.
