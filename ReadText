@@ -1,0 +1,39 @@
+DATA: BEGIN OF ltext OCCURS 50.
+    INCLUDE STRUCTURE tline.
+DATA: END OF ltext.
+DATA: lt_lines TYPE TABLE OF tline WITH HEADER LINE.
+
+* Texto de posiciones.
+    CONCATENATE header-ebeln wa_ekpo-ebelp INTO tname.
+    CALL FUNCTION 'READ_TEXT'
+      EXPORTING
+*       CLIENT                  = SY-MANDT
+        id                      = 'A01'
+        language                = sy-langu
+        name                    = tname
+        object                  = 'EKPO'
+*       ARCHIVE_HANDLE          = 0
+*       LOCAL_CAT               = ' '
+*     IMPORTING
+*       HEADER                  =
+*       OLD_LINE_COUNTER        =
+      TABLES
+        lines                   = lt_lines
+      EXCEPTIONS
+        id                      = 1
+        language                = 2
+        name                    = 3
+        not_found               = 4
+        object                  = 5
+        reference_check         = 6
+        wrong_access_to_archive = 7
+        OTHERS                  = 8.
+    IF sy-subrc <> 0.
+* Implement suitable error handling here
+    ENDIF.
+    READ TABLE lt_lines INDEX 1.
+    IF sy-subrc = 0.
+      MOVE lt_lines-tdline TO wa_ekpo-txpos.
+    ENDIF.
+    MODIFY it_ekpo FROM wa_ekpo.
+ENDIF.
