@@ -1,0 +1,14 @@
+DATA: l_edit(1).
+** Se comprueba que se esté en la ME51N/2 o 3 en modo edición
+*
+* Para comprobar si l_edit es X que elñ icono de modificar esta seleccionado.
+  IMPORT g_edit TO l_edit FROM MEMORY ID 'FLAG_EDIT'.
+*
+  LOOP AT SCREEN.
+    IF  sy-tcode = 'ME51N' OR sy-tcode = 'ME52N' OR
+      ( sy-tcode = 'ME53N' AND l_edit = 'X' ).
+      screen-input = 1.
+    ELSE.
+      screen-input = 0.
+    ENDIF.
+    MODIFY SCREEN.
