@@ -2,6 +2,8 @@ DATA: BEGIN OF ltext OCCURS 50.
     INCLUDE STRUCTURE tline.
 DATA: END OF ltext.
 DATA: lt_lines TYPE TABLE OF tline WITH HEADER LINE.
+DATA: tname LIKE THEAD-TDNAME.
+
 
 * Texto de posiciones.
     CONCATENATE header-ebeln wa_ekpo-ebelp INTO tname.
