@@ -38,4 +38,4 @@ DATA: tname LIKE THEAD-TDNAME.
       MOVE lt_lines-tdline TO wa_ekpo-txpos.
     ENDIF.
     MODIFY it_ekpo FROM wa_ekpo.
-ENDIF.
+
