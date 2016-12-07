@@ -1,0 +1,63 @@
+
+  Halcon -- ZRVADOR01_ETIM
+  
+  " Mdiez loop para imprimir todas las posiciones.
+  LOOP AT tvbdpa INTO wa_tvbdpa.
+
+    ls_control_param-no_open = 'X'.
+    ls_control_param-no_close = 'X'.
+
+    at first.
+    ls_control_param-no_open = space.
+    ls_control_param-no_close = 'X'.
+    endat.
+
+    at last.
+    ls_control_param-no_open = 'X'.
+    ls_control_param-no_close = space .
+    endat.
+
+    if l_i eq 1.
+      ls_control_param-no_open  = space.
+      ls_control_param-no_close = space.
+    endif.
+
+    ls_control_param-no_dialog = 'X'.
+
+    ls_composer_param-tdimmed = 'X'.
+    ls_composer_param-tddest = 'LOCL'.
+
+  call function lf_fm_name
+    exporting
+      archive_index        = toa_dara
+      archive_parameters   = arc_params
+      control_parameters   = ls_control_param
+      mail_recipient       = ls_recipient
+      mail_sender          = ls_sender
+      output_options       = ls_composer_param
+      user_settings        = ' '
+      znast                = nast
+      zvbdka               = vbdka
+      wtvbdpa              = wa_tvbdpa
+      zaddres              = addr_key
+    importing
+      document_output_info = document_output_info
+      job_output_info      = job_output_info
+      job_output_options   = job_output_options
+    tables
+      ztvbdpa              = tvbdpa
+    exceptions
+      formatting_error     = 1
+      internal_error       = 2
+      send_error           = 3
+      user_canceled        = 4
+      others               = 5.
+
+  if sy-subrc <> 0.
+    retcode = sy-subrc.
+    perform protocol_update.
+
+* get SmartForm protocoll and store it in the NAST protocoll
+    perform add_smfrm_prot.
+  endif.
+ENDLOOP.
