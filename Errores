@@ -1,0 +1,3 @@
+En un smartforms, cuando se genera un sy-subrc <> 0.
+sy-msgv1, sy-msgno,sy-msgid
+Luego vamos a la t100 y vemos el tipo de error.
