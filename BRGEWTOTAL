@@ -1,0 +1,32 @@
+"En los tipos para las tablas itbrgew.
+TYPES: BEGIN OF brgewtot,
+         sammg TYPE sammg,
+         vgbel TYPE vgbel,
+         brgew TYPE BRGEW_SG,
+       END OF brgewtot.
+TYPES  tty_brgewtot TYPE TABLE OF brgewtot.
+
+"En los datos globales.
+IT_BRGEWTOT TYPE TTY_BREGWTOT.
+WA_BRGEWTOT TYPE BRGEWTOT.
+
+" Para sacar el peso por posición de Albarán.
+LOOP AT it_vbrp INTO wa_vbrp.
+  IF lv_sammg = wa_vbrp-sammg AND lv_vgbel = wa_vbrp-vgbel.
+    wa_brgewtot-sammg = wa_vbrp-sammg.
+    wa_brgewtot-vgbel = wa_vbrp-vgbel.
+    wa_brgewtot-brgew = WA_BRGEWTOT-brgew + wa_vbrp-brgew.
+    APPEND wa_brgewtot TO it_brgewtot.
+    ELSEIF lv_sammg <> wa_vbrp-sammg AND lv_vgbel <> wa_vbrp-vgbel.
+        clear wa_brgewtot-brgew.
+        lv_sammg = wa_vbrp-sammg.
+        lv_vgbel = wa_vbrp-vgbel.
+        wa_brgewtot-sammg = wa_vbrp-sammg.
+        wa_brgewtot-vgbel = wa_vbrp-vgbel.
+        wa_brgewtot-brgew = WA_BRGEWTOT-brgew + wa_vbrp-brgew.
+        APPEND wa_brgewtot TO it_brgewtot.
+  ENDIF.
+ENDLOOP.
+
+SORT it_brgewtot BY sammg vgbel brgew DESCENDING.
+DELETE ADJACENT DUPLICATES FROM it_brgewtot.
