@@ -1,0 +1,50 @@
+* Si el peso neto > peso bruto
+* el bruto = bruto + pesopalets (mara)
+* y el neto = bruto.
+
+"En la pestaña de los datos globales:
+GV_FLAGP	TYPE	CHAR1
+GV_PESONETO	TYPE	BRGEW
+GV_PESOBRUTO	TYPE	BRGEW
+
+
+DATA lv_matnr TYPE matnr.
+DATA lv_brgew TYPE brgew.
+
+SELECT SINGLE matnr INTO lv_matnr
+  FROM vepo
+  WHERE vbeln = wa_vbrp-vgbel.
+IF sy-subrc = 0.
+  SELECT SINGLE brgew INTO lv_brgew
+    FROM mara
+    WHERE matnr = lv_matnr.
+ENDIF.
+
+CLEAR gv_flagp.
+IF gs_hd_gen-net_weight > gs_hd_gen-brt_weight.
+  gv_flagp = 'X'.
+  "neto = bruto.
+   GV_PESONETO = gs_hd_gen-brt_weight.
+  "bruto = bruto + pesopalets
+   GV_PESOBRUTO = gs_hd_gen-brt_weight + lv_brgew.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
