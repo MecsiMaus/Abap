@@ -1,0 +1,183 @@
+DATA l_it_gen LIKE LINE OF is_bil_invoice-it_gen.
+DATA it_refdlv TYPE TABLE OF lbbil_it_refdlv.
+DATA l_refdlv TYPE lbbil_it_refdlv.
+DATA lv_fkart TYPE fkart.
+DATA: it_vbss TYPE TABLE OF vbss.
+DATA: itt_vbss TYPE TABLE OF vbss.
+DATA: wa_vbss TYPE vbss.
+DATA: lv_smart TYPE smart.
+DATA: lv_vbeln TYPE vbeln.
+DATA: lv_tknum TYPE tknum.
+DATA: lv_sammg TYPE SAMMG.
+DATA: lv_vgbel TYPE VGBEL.
+DATA: lv_index TYPE i.
+DATA: index type i.
+DATA i TYPE i.
+DATA: it_vbssaux TYPE TABLE OF vbss.
+DATA it_albaran2 LIKE it_albaran WITH HEADER LINE.
+DATA lv_contenedor TYPE string.
+DATA IT_VBRP_AUX TYPE TABLE OF vbrp.
+DATA: lv_brgew TYPE BRGEW.
+
+it_refdlv[] = is_bil_invoice-it_refdlv[].
+SORT it_refdlv BY deliv_numb itm_number_dlv.
+
+LOOP AT it_refdlv INTO l_refdlv.
+  READ TABLE is_bil_invoice-it_gen INTO l_it_gen
+  WITH KEY bil_number = l_refdlv-bil_number
+  itm_number = l_refdlv-itm_number.
+  IF sy-subrc = 0.
+    gv_factura = l_it_gen-bil_number.
+    APPEND l_it_gen TO gs_it_gen_t.
+  ENDIF.
+ENDLOOP.
+
+READ TABLE is_bil_invoice-it_refdlv INTO l_refdlv
+WITH KEY itm_number = gs_it_gen-itm_number.
+IF sy-subrc = 0.
+  IF albaran <> l_refdlv-deliv_numb.
+    albaran = l_refdlv-deliv_numb.
+    lv_albaranaux = albaran.
+  ENDIF.
+ENDIF.
+
+************************************************ Mdiez
+IF gv_factura IS NOT INITIAL.
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE it_vbrp
+  FROM vbrp
+  WHERE vbeln = gv_factura
+  AND pstyv <> 'HUPM'.
+ENDIF.
+
+LOOP AT it_vbrp INTO wa_vbrp.
+  CLEAR wa_vbrp-cambio.
+  SELECT * INTO TABLE it_vbss
+    FROM vbss
+    WHERE vbeln = wa_vbrp-vgbel.
+  IF sy-subrc = 0.
+    LOOP AT it_vbss INTO wa_vbss.
+      SELECT * INTO CORRESPONDING FIELDS OF TABLE it_vttp
+       FROM vttp
+       WHERE vbeln = wa_vbss-vbeln.
+      IF sy-subrc = 0.
+        LOOP AT it_vttp INTO wa_vttp.
+          SELECT SINGLE text1 text2 INTO ( gv_contenedor,gv_precinto )
+            FROM vttk
+            WHERE tknum = wa_vttp-tknum.
+        ENDLOOP.
+      ENDIF.
+      SELECT SINGLE smart INTO lv_smart
+        FROM vbsk
+        WHERE sammg = wa_vbss-sammg.
+      IF sy-subrc = 0 AND lv_smart <> 'M'.
+        DELETE it_vbss INDEX sy-tabix.
+        IF it_vbss[] IS INITIAL.
+          wa_delalbaran-vgbel = wa_vbss-vbeln.
+          APPEND wa_delalbaran to it_delalbaran.
+        ENDIF.
+      ELSE.
+        wa_vbrp-sammg = wa_vbss-sammg.
+      ENDIF.
+    ENDLOOP.
+  ENDIF.
+  IF sy-tabix = 1.
+    lv_sammg = wa_vbss-sammg.
+    wa_vbrp-sammg = wa_vbss-sammg.
+    APPEND LINES OF it_vbss TO it_vbssaux.
+  ELSEIF lv_sammg <> wa_vbss-sammg.
+    gv_nalbaran = wa_vbrp-vgbel.
+    lv_sammg = wa_vbss-sammg.
+    wa_vbrp-sammg = wa_vbss-sammg.
+    APPEND LINES OF it_vbss TO it_vbssaux.
+  ENDIF.
+  MODIFY it_vbrp FROM wa_vbrp.
+ENDLOOP.
+
+"Borramos lo albaranes que no sean SMART = M.
+LOOP AT it_vbrp INTO wa_vbrp.
+  READ TABLE IT_DELALBARAN INTO WA_DELALBARAN
+  WITH KEY vgbel = wa_vbrp-vgbel.
+  IF sy-subrc = 0.
+    DELETE it_vbrp WHERE vgbel = wa_vbrp-vgbel.
+  ENDIF.
+ENDLOOP.
+
+SORT it_vbrp BY sammg.
+
+LOOP AT it_vbrp INTO wa_vbrp.
+  CLEAR wa_vbrp-cambio.
+  IF sy-tabix = 1.
+    lv_sammg = wa_vbrp-sammg.
+    wa_vbrp-cambio = 'X'.
+  ELSEIF lv_sammg <> wa_vbrp-sammg.
+    lv_sammg = wa_vbrp-sammg.
+    wa_vbrp-cambio = 'X'.
+  ENDIF.
+  MODIFY it_vbrp FROM wa_vbrp.
+ENDLOOP.
+
+READ TABLE it_vbrp INTO wa_vbrp INDEX 1.
+IF sy-subrc = 0.
+  lv_sammg = wa_vbrp-sammg.
+  lv_vgbel = wa_vbrp-vgbel.
+ENDIF.
+
+" Para sacar el peso por posición de Albarán.
+LOOP AT it_vbrp INTO wa_vbrp.
+  IF wa_vbrp-cambio = 'X'.
+    clear wa_brgewtot-brgew.
+    wa_brgewtot-sammg = wa_vbrp-sammg.
+    wa_brgewtot-vgbel = wa_vbrp-vgbel.
+    wa_brgewtot-brgew = WA_BRGEWTOT-brgew + wa_vbrp-brgew.
+    APPEND wa_brgewtot TO it_brgewtot.
+    ELSEIF wa_vbrp-cambio <> 'X'.
+        lv_sammg = wa_vbrp-sammg.
+        lv_vgbel = wa_vbrp-vgbel.
+        wa_brgewtot-sammg = wa_vbrp-sammg.
+        wa_brgewtot-vgbel = wa_vbrp-vgbel.
+        wa_brgewtot-brgew = WA_BRGEWTOT-brgew + wa_vbrp-brgew.
+        APPEND wa_brgewtot TO it_brgewtot.
+  ENDIF.
+ENDLOOP.
+
+SORT it_brgewtot BY sammg brgew DESCENDING.
+DELETE ADJACENT DUPLICATES FROM it_brgewtot COMPARING sammg.
+
+LOOP AT it_vbrp INTO wa_vbrp.
+  SELECT SINGLE tknum INTO lv_tknum
+   FROM vttp
+   WHERE vbeln = wa_vbrp-vgbel.
+IF sy-subrc = 0.
+  SELECT SINGLE text1 text2 INTO ( wa_vbrp-text1,wa_vbrp-text2 )
+    FROM vttk
+    WHERE tknum = lv_tknum.
+    IF sy-subrc = 0.
+      MODIFY it_vbrp FROM wa_vbrp.
+    ENDIF.
+    ENDIF.
+ENDLOOP.
+
+it_vbrpaux[] = it_vbrp[].
+sort it_vbrpaux by text1.
+LOOP AT it_vbrpaux INTO wa_vbrp.
+  IF sy-tabix = 1.
+     lv_contenedor =  WA_VBRP-TEXT1.
+     gv_conta = gv_conta + 1.
+  ENDIF.
+      IF lv_contenedor <> WA_VBRP-TEXT1.
+        lv_contenedor =  WA_VBRP-TEXT1.
+        gv_conta = gv_conta + 1.
+      ENDIF.
+ENDLOOP.
+
+************************************************ Mdiez.
+* JGS
+IF it_vbrp[] IS NOT INITIAL.
+  DATA vv_fkart LIKE vbrk-fkart.
+  SELECT SINGLE fkart INTO vv_fkart FROM vbrk
+    WHERE vbeln = is_bil_invoice-hd_gen-bil_number.
+  IF vv_fkart = 'ZF2'.
+    DELETE it_vbrp WHERE uepos IS NOT INITIAL.
+  ENDIF.
+ENDIF.
+*FJGS
