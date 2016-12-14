@@ -1,0 +1,26 @@
+ Transaction code - SMW0
+* X - Binary data for WebRFC application
+* Hit Enter
+* Click Execute
+* Click Settings -> Maintain MIME types
+* Click the Create button
+* Fill in :- TYPE : image/gif EXTENSION : .GIF
+* Click Save
+* Click Back to the Binary data for WebRFC
+* Click Create
+* Fill in :- Obj. name : ZXXXX.GIF Description :
+* Company Logo
+* Click Import and specify the filename where your
+* GIF file is
+* located.File type is BIN. Finish press the
+* Transfer button.
+* If successful, your logo will be shown in the
+* Binary data for
+* WebRFC.
+* Transaction code SM30 - Table/View - SSM_CUST
+* Click Maintain
+* Click New Entries
+* Name Value to be set
+* START_IMAGE ZXXXX.GIF
+* RESIZE_IMAGE NO
+* Logoff and Login again
